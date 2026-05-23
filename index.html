@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Finder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-container">
+      <h1>📚 Book Finder</h1>
+      <form id="search-form" class="search-form" novalidate>
+        <div class="search-group">
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search by book title or author..." 
+            autocomplete="off"
+            required
+            aria-label="Search by book title or author"
+          >
+          <button type="submit" id="search-submit" class="btn-primary">Search</button>
+        </div>
+      </form>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Results Section -->
+    <section id="results-section" class="content-section">
+      <h2>Search Results</h2>
+      <div id="results-error" class="error-container"></div>
+      <div id="results" class="cards-grid"></div>
+    </section>
+
+    <!-- Reading List Section -->
+    <section id="reading-list-section" class="content-section">
+      <div class="section-header">
+        <h2>My Reading List</h2>
+        <div class="filter-chips" role="group" aria-label="Filter reading list">
+          <button type="button" class="chip active" data-filter="all">All</button>
+          <button type="button" class="chip" data-filter="want_to_read">Want to Read</button>
+          <button type="button" class="chip" data-filter="read">Read</button>
+        </div>
+      </div>
+      <div id="reading-list-error" class="error-container"></div>
+      <div id="reading-list" class="cards-grid"></div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
