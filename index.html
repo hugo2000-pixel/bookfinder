@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Finder</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <header class="app-header">
     <div class="header-container">
-      <h1>📚 Book Finder</h1>
+      <div class="header-top">
+        <h1>📚 Book Finder</h1>
+        <!-- User bar: shows "Sign in with Google" when signed out, avatar + Sign out when signed in -->
+        <div id="user-bar" class="user-bar"></div>
+      </div>
       <form id="search-form" class="search-form" novalidate>
         <div class="search-group">
-          <input 
-            type="text" 
-            id="search-input" 
-            placeholder="Search by book title or author..." 
-            autocomplete="off"
-            required
-            aria-label="Search by book title or author"
-          >
+          <input type="text" id="search-input" placeholder="Search by book title or author..." autocomplete="off"
+            required aria-label="Search by book title or author">
           <button type="submit" id="search-submit" class="btn-primary">Search</button>
         </div>
       </form>
@@ -51,4 +51,5 @@
 
   <script type="module" src="app.js"></script>
 </body>
+
 </html>

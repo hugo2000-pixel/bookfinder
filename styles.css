@@ -3,7 +3,7 @@
 /* CSS Reset & Variable Definitions */
 :root {
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  
+
   /* Light Theme Palette */
   --bg-app: hsl(220, 20%, 97%);
   --bg-card: hsl(0, 0%, 100%);
@@ -13,29 +13,29 @@
   --primary: hsl(256, 100%, 57%);
   --primary-hover: hsl(256, 100%, 50%);
   --primary-glow: hsla(256, 100%, 57%, 0.15);
-  
+
   --border: hsl(214, 32%, 91%);
   --border-focus: hsl(256, 100%, 65%);
-  
+
   --pill-want-bg: hsl(200, 95%, 94%);
   --pill-want-text: hsl(200, 95%, 28%);
   --pill-read-bg: hsl(142, 70%, 92%);
   --pill-read-text: hsl(142, 72%, 22%);
-  
+
   --danger: hsl(0, 84%, 60%);
   --danger-hover: hsl(0, 84%, 53%);
   --danger-bg: hsl(0, 84%, 97%);
   --danger-border: hsl(0, 84%, 85%);
-  
+
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 12px 30px -10px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.12);
-  
+
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-full: 9999px;
-  
+
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -51,26 +51,28 @@
     --primary: hsl(256, 100%, 68%);
     --primary-hover: hsl(256, 100%, 75%);
     --primary-glow: hsla(256, 100%, 68%, 0.25);
-    
+
     --border: hsl(217, 32%, 16%);
-    
+
     --pill-want-bg: hsl(200, 95%, 12%);
     --pill-want-text: hsl(200, 95%, 68%);
     --pill-read-bg: hsl(142, 70%, 10%);
     --pill-read-text: hsl(142, 72%, 62%);
-    
+
     --danger: hsl(0, 84%, 65%);
     --danger-hover: hsl(0, 84%, 72%);
     --danger-bg: hsl(0, 84%, 10%);
     --danger-border: hsl(0, 84%, 20%);
-    
+
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 12px 30px -10px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
   }
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -159,7 +161,8 @@ body {
 }
 
 /* Button & Chip Base Styles */
-button, .chip {
+button,
+.chip {
   cursor: pointer;
   font-family: inherit;
   font-size: 0.9rem;
@@ -405,7 +408,8 @@ button, .chip {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: 2.7rem; /* Fits 2 lines exactly */
+  height: 2.7rem;
+  /* Fits 2 lines exactly */
 }
 
 .card-authors {
@@ -422,7 +426,8 @@ button, .chip {
 .card-year {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin-bottom: auto; /* Pushes the button to the bottom */
+  margin-bottom: auto;
+  /* Pushes the button to the bottom */
 }
 
 /* Status Pill Badge */
@@ -522,8 +527,8 @@ button, .chip {
 }
 
 /* Accessible focus outline */
-button:focus-visible, 
-.chip:focus-visible, 
+button:focus-visible,
+.chip:focus-visible,
 input:focus-visible,
 a:focus-visible {
   outline: 3px solid var(--border-focus);
@@ -532,17 +537,33 @@ a:focus-visible {
 
 /* Animations */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInDown {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Scrollbar styling */
@@ -550,13 +571,109 @@ a:focus-visible {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-app);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: var(--radius-full);
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* ==========================================
+   USER BAR (Google Auth)
+   ========================================== */
+
+/* Layout: title left, user bar right, search bar below */
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.user-bar {
+  display: flex;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.4rem 0.4rem 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1f2937;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The Sign out button inside .user-info is already styled via .btn-secondary
+   but we tighten its sizing here so it fits the pill */
+.user-info .btn-secondary {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+/* Mobile: stack title and user bar */
+@media (max-width: 600px) {
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-bar {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .user-name {
+    max-width: 100px;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .user-info {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .user-name {
+    color: #f3f4f6;
+  }
 }
