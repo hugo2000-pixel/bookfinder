@@ -1,5 +1,5 @@
 /**
- * BOOK FINDER - STATIC WEB APPLICATION (v2 with Google Auth)
+ * BOOK FINDER - STATIC WEB APPLICATION (v2.1 with Google Auth + bugfix)
  *
  * Each authenticated user has their own private reading list, isolated by Firestore
  * security rules. Sign-in uses Google OAuth via Firebase Authentication.
@@ -54,7 +54,6 @@ const googleProvider = new GoogleAuthProvider();
 // ==========================================
 
 async function signInWithGoogle() {
-  // signInWithPopup opens a Google login window; onAuthStateChanged below will react
   await signInWithPopup(auth, googleProvider);
 }
 
@@ -68,8 +67,8 @@ async function signOutUser() {
 // ==========================================
 
 function getDeterministicDocId(olKey, userId) {
-  // Include userId in the doc ID so different users can save the same book
-  // without colliding on a shared deterministic ID.
+  // Defensive: never throw on missing inputs
+  if (!olKey || !userId) return null;
   const stripped = olKey.startsWith('/') ? olKey.slice(1) : olKey;
   const cleanKey = stripped.replace(/\//g, '_');
   return `${userId}_${cleanKey}`;
@@ -81,6 +80,8 @@ async function saveBook(book) {
   if (!book.olKey) throw new Error("Unable to save book: Missing OpenLibrary key.");
 
   const docId = getDeterministicDocId(book.olKey, user.uid);
+  if (!docId) throw new Error("Unable to compute document ID.");
+
   const docRef = doc(db, "readingList", docId);
 
   await setDoc(docRef, {
@@ -90,7 +91,7 @@ async function saveBook(book) {
     coverUrl: book.coverUrl,
     olKey: book.olKey,
     status: 'want_to_read',
-    userId: user.uid, // CRITICAL: required by Firestore security rules
+    userId: user.uid,
     createdAt: serverTimestamp()
   }, { merge: false });
 }
@@ -105,8 +106,6 @@ async function removeBook(docId) {
 }
 
 function subscribeReadingList(userId, onUpdate, onError) {
-  // Filter by userId so we only fetch the current user's books.
-  // Security rules enforce this server-side too — this is just for efficiency.
   const q = query(
     collection(db, "readingList"),
     where("userId", "==", userId),
@@ -246,14 +245,32 @@ function renderResults(container, books) {
   const user = auth.currentUser;
 
   books.forEach(book => {
-    const isSaved = user
-      ? state.savedIds.has(getDeterministicDocId(book.olKey, user.uid))
-      : false;
+    // A book is savable only if (a) the user is signed in AND (b) the book has an OpenLibrary key
+    const hasKey = !!(book.olKey && book.olKey.length > 0);
+    const docId = (user && hasKey) ? getDeterministicDocId(book.olKey, user.uid) : null;
+    const isSaved = docId ? state.savedIds.has(docId) : false;
+
+    // Compute label + disabled state explicitly so behavior is obvious and debuggable
+    let buttonLabel;
+    let buttonDisabled;
+    if (!user) {
+      buttonLabel = "Sign in to save";
+      buttonDisabled = true;
+    } else if (!hasKey) {
+      buttonLabel = "Unavailable";
+      buttonDisabled = true;
+    } else if (isSaved) {
+      buttonLabel = "Saved";
+      buttonDisabled = true;
+    } else {
+      buttonLabel = "Save";
+      buttonDisabled = false;
+    }
 
     const saveBtn = el('button', {
       type: 'button',
       class: 'btn-primary',
-      disabled: isSaved || !user,
+      disabled: buttonDisabled,
       onClick: async (e) => {
         if (!auth.currentUser) {
           renderError(document.getElementById('results-error'),
@@ -273,7 +290,7 @@ function renderResults(container, books) {
             "Could not save the book. Please try again.");
         }
       }
-    }, !user ? "Sign in to save" : (isSaved ? "Saved" : "Save"));
+    }, buttonLabel);
 
     container.appendChild(
       el('div', { class: 'book-card' },
@@ -313,6 +330,8 @@ function renderReadingList(container, savedBooks) {
 
   filtered.forEach(book => {
     const docId = getDeterministicDocId(book.olKey, auth.currentUser.uid);
+    if (!docId) return; // Defensive: skip books without a valid ID
+
     const pillText = book.status === 'want_to_read' ? 'Want to Read' : 'Read';
 
     const toggleBtn = el('button', {
@@ -458,7 +477,7 @@ const state = {
   currentFilter: 'all',
   currentResults: [],
   readingList: [],
-  unsubscribeReadingList: null // holds the active Firestore listener cleanup function
+  unsubscribeReadingList: null
 };
 
 
@@ -478,7 +497,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderEmpty(resultsContainer, "Search for a book at the top to start!");
 
-  // --- Search form ---
   searchForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     clear(resultsErrorContainer);
@@ -505,7 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- Filter chips ---
   if (filterChipsContainer) {
     filterChipsContainer.addEventListener('click', (e) => {
       const chip = e.target.closest('.chip');
@@ -517,12 +534,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Auth state listener: drives the entire app lifecycle ---
   onAuthStateChanged(auth, (user) => {
     renderUserBar(user);
     clear(readingListErrorContainer);
 
-    // Tear down any existing Firestore listener before swapping users (or signing out)
     if (state.unsubscribeReadingList) {
       state.unsubscribeReadingList();
       state.unsubscribeReadingList = null;
@@ -530,7 +545,6 @@ document.addEventListener('DOMContentLoaded', () => {
     state.readingList = [];
     state.savedIds = new Set();
 
-    // Re-render results so Save buttons reflect new auth state
     if (state.currentResults.length > 0) {
       renderResults(resultsContainer, state.currentResults);
     }
@@ -540,7 +554,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // User is signed in — subscribe to their private reading list
     renderLoading(readingListContainer, "Loading your reading list...");
     state.unsubscribeReadingList = subscribeReadingList(
       user.uid,
@@ -560,7 +573,8 @@ document.addEventListener('DOMContentLoaded', () => {
             status: data.status || 'want_to_read'
           });
           if (data.olKey) {
-            newSavedIds.add(getDeterministicDocId(data.olKey, user.uid));
+            const id = getDeterministicDocId(data.olKey, user.uid);
+            if (id) newSavedIds.add(id);
           }
         });
 
@@ -580,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
     );
   });
 
-  // Clean up Firestore listener when leaving the page
   window.addEventListener('beforeunload', () => {
     if (state.unsubscribeReadingList) state.unsubscribeReadingList();
   });
